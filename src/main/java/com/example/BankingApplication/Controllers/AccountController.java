@@ -1,18 +1,23 @@
 package com.example.BankingApplication.Controllers;
 
 import com.example.BankingApplication.Entities.Accounts;
+import com.example.BankingApplication.Entities.Transactions;
 import com.example.BankingApplication.Repository.AccountDAO;
+import com.example.BankingApplication.Repository.TransactionsDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @RestController
 public class AccountController {
 
     @Autowired
     AccountDAO accDao;
+    @Autowired
+    TransactionsDAO transDao;
 
     // Register/Create Customer Record
     @PostMapping("/register")
@@ -69,7 +74,14 @@ public class AccountController {
         toCustomerAcc.setBalance(toCustomerAcc.getBalance() + amount);
         accDao.save(fromCustomerAcc);
         accDao.save(toCustomerAcc);
+        String transId = generateUniqueId();
+        transDao.save(new Transactions(transId, fromCustomerAcc.getAccountNo(), toCustomerAcc.getAccountNo(), amount));
         return "Transaction Successful";
+    }
+
+    public static String generateUniqueId() {
+        UUID uuid = UUID.randomUUID();
+        return uuid.toString();
     }
 
     // Display Balance Amount of an Account
